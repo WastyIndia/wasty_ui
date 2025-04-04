@@ -1,74 +1,161 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { Button } from 'react-native-elements';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
+import { makeRedirectUri } from 'expo-auth-session';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { Dimensions } from 'react-native';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const screenWidth = Dimensions.get('window').width;
 
-export default function HomeScreen() {
+WebBrowser.maybeCompleteAuthSession();
+
+type LoginScreenProps = {
+  navigation: StackNavigationProp<any>;
+};
+
+export default function LoginScreen({ navigation }: LoginScreenProps) {
+  const [userInfo, setUserInfo] = useState(null);
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId: Platform.OS === 'ios'
+      ? 'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com'
+      : 'YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com',
+    webClientId: 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
+    redirectUri: makeRedirectUri({ useProxy: true }),
+  });
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      console.log('Google Auth Response:', response);
+      navigation.replace('(tabs)'); // Navigate to main app
+    }
+  }, [response]);
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <View style={styles.container}>
+      <View style={styles.illustrationContainer}>
+        <Text style={styles.welcome}>Welcome to Wasty</Text>
+        <Image source={require('@/assets/images/placeholder.png')} style={styles.illustration} />
+      </View>
+
+      <View style={styles.contentContainer}>
+        <Text style={styles.title}>Welcome</Text>
+        <Text style={styles.description}>
+          The article states that the numerals used for official purposes should be in the international form of Indian numerals.
+        </Text>
+
+        <Button
+          title="Continue with Google"
+          icon={{
+            name: 'google',
+            type: 'font-awesome',
+            color: 'black',
+            size: 20,
+          }}
+          iconContainerStyle={{ marginRight: 10 }}
+          buttonStyle={styles.button}
+          titleStyle={styles.buttonText}
+          onPress={() => promptAsync()}
+          disabled={!request}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it test</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+
+        <Button
+          title="Continue Sign up"
+          icon={{
+            name: 'envelope',
+            type: 'font-awesome',
+            color: 'black',
+            size: 20,
+          }}
+          iconContainerStyle={{ marginRight: 10 }}
+          buttonStyle={styles.button}
+          titleStyle={styles.buttonText}
+          onPress={() => console.log('Sign Up')}
+        />
+
+        <TouchableOpacity onPress={() => console.log('Navigate to Log In')}>
+          <Text style={styles.link}>Already have an account? Log in</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    width: screenWidth,
+  },
+  illustrationContainer: {
     alignItems: 'center',
-    gap: 8,
+    width: screenWidth,
+    height: 500,
+    justifyContent: 'flex-end',
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  illustration: {
+    width: screenWidth,
+    height: '100%',
+    resizeMode: 'cover',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
+  welcome: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    position: 'absolute',
+    top: 50,
+    fontFamily: Platform.OS === 'ios' ? 'Helvetica' : 'sans-serif',
+    letterSpacing: 2,
+    zIndex: 4,
+  },
+  contentContainer: {
+    position: 'absolute',
     bottom: 0,
     left: 0,
-    position: 'absolute',
+    right: 0,
+    padding: 20,
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 300,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  description: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#777',
+    marginBottom: 20,
+  },
+  button: {
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    width: '90%',
+    marginBottom: 10,
+    borderRadius: 30,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+  },
+  buttonText: {
+    color: 'black',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: 40,
+  },
+  link: {
+    fontSize: 16,
+    color: '#007BFF',
+    marginTop: 10,
+    textDecorationLine: 'underline',
   },
 });

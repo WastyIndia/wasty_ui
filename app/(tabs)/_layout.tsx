@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Tabs, Stack } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
 
@@ -11,6 +11,25 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
+  const isLoggedIn = false; 
+
+  if (!isLoggedIn) {
+    console.log('User is not logged in');
+    // If the user is not logged in, show the Login screen
+    return (
+      <Stack>
+        <Stack.Screen
+          name="login"
+          options={{
+            headerShown: false,
+          }}
+        />
+      </Stack>
+    );
+  }
+else {
+  console.log('User is logged in already');
+  // If the user is logged in, show the Tabs layout
   return (
     <Tabs
       screenOptions={{
@@ -42,4 +61,5 @@ export default function TabLayout() {
       />
     </Tabs>
   );
+}
 }
